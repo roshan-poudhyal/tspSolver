@@ -1,39 +1,26 @@
-# 🧠 TSP Solver using Genetic Algorithm
+📌 Project Description
+The Traveling Salesman Problem asks:
 
-This project implements a Genetic Algorithm to solve the **Traveling Salesman Problem (TSP)** — a classic NP-hard optimization problem.  
-It efficiently finds near-optimal routes through multiple cities by simulating natural selection, crossover, and mutation.
+"Given a list of cities and distances between each pair, find the shortest possible route that visits each city exactly once and returns to the starting point."
 
----
+This project uses a Genetic Algorithm (GA) — a biologically-inspired optimization technique — to find near-optimal solutions for the TSP.
 
-## 🚀 Features
-- Solve TSP for any number of cities
-- Visualize the best route found
-- Configurable parameters (population size, mutation rate, number of generations, etc.)
-- Fast and efficient using Genetic Algorithm techniques
-- Lightweight and easy to use
+✨ Features
+🏙️ Support for any number of cities
 
----
+🔧 Fully customizable GA parameters:
 
-## 🛠️ Technologies Used
-- **Python 3**
-- **Flask** (for the web interface)
-- **HTML/CSS/JavaScript** (for visualization)
-- **Genetic Algorithm** (core optimization engine)
+Population size
 
----
+Mutation rate
 
-## 📈 How It Works
-1. **Initialization**: Generate a random population of possible city tours.
-2. **Selection**: Select the fittest tours (shortest distance).
-3. **Crossover**: Create new offspring by combining parts of two parents.
-4. **Mutation**: Randomly tweak tours to maintain diversity.
-5. **Repeat**: Over many generations, the population evolves towards better solutions.
+Number of generations
 
----
+Selection & Crossover methods
 
-## 🔥 Setup Instructions
+📈 Real-time visualization of evolving tours (optional)
 
-### 1. Clone the repository
-```bash
-git clone https://github.com/roshan-poudhyal/tspSolver.git
-cd tspSolver
+⚡ Fast and efficient solution even for larger datasets
+
+🛠️ Easy to extend and modify
+
