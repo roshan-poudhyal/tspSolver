@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genetic Algorithm Details</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --accent-color: #FF9800;
+            --background-color: #f5f7fa;
+            --card-background: rgba(255, 255, 255, 0.9);
+            --text-color: #333;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--background-color) 0%, #e4e8eb 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .nav-button {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .content-section {
+            background: var(--card-background);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        .algorithm-step {
+            margin-bottom: 30px;
+        }
+
+        .algorithm-step h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .visualization {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .parameter-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .parameter-table th, .parameter-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .parameter-table th {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .parameter-table tr:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-section {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-buttons">
+            <a href="index.html" class="nav-button">Home</a>
+            <a href="solver.html" class="nav-button">Interactive Solver</a>
+            <a href="about.html" class="nav-button">About TSP</a>
+        </div>
+
+        <div class="content-section">
+            <h2>Genetic Algorithm Implementation</h2>
+            <p>Our TSP solver uses a genetic algorithm with the following key components:</p>
+
+            <div class="algorithm-step">
+                <h3>1. Population Initialization</h3>
+                <p>The algorithm starts by creating a population of random routes. Each route is a permutation of the cities.</p>
+                <div class="code-block">
+                    initializePopulation() {
+                        this.population = new Population(this.populationSize);
+                        for (let i = 0; i < this.populationSize; i++) {
+                            const shuffledCities = [...this.cities].sort(() => Math.random() - 0.5);
+                            this.population.routes[i] = new Route(shuffledCities);
+                        }
+                        this.bestRoute = this.population.getBestRoute();
+                    }
+                </div>
+            </div>
+
+            <div class="algorithm-step">
+                <h3>2. Fitness Evaluation</h3>
+                <p>Each route's fitness is determined by its total distance. Shorter routes have higher fitness.</p>
+                <div class="code-block">
+                    calculateDistance() {
+                        let totalDistance = 0;
+                        for (let i = 0; i < this.cities.length - 1; i++) {
+                            const city1 = this.cities[i];
+                            const city2 = this.cities[i + 1];
+                            totalDistance += Math.sqrt(
+                                Math.pow(city2.x - city1.x, 2) + Math.pow(city2.y - city1.y, 2)
+                            );
+                        }
+                        return totalDistance;
+                    }
+                </div>
+            </div>
+
+            <div class="algorithm-step">
+                <h3>3. Selection (Tournament Selection)</h3>
+                <p>Routes are selected for reproduction using tournament selection, which helps maintain diversity.</p>
+                <div class="code-block">
+                    tournamentSelection() {
+                        const tournamentSize = 5;
+                        let best = null;
+                        for (let i = 0; i < tournamentSize; i++) {
+                            const randomIndex = Math.floor(Math.random() * this.populationSize);
+                            const candidate = this.population.routes[randomIndex];
+                            if (!best || candidate.distance < best.distance) {
+                                best = candidate;
+                            }
+                        }
+                        return best;
+                    }
+                </div>
+            </div>
+
+            <div class="algorithm-step">
+                <h3>4. Crossover (Order Crossover)</h3>
+                <p>Two parent routes are combined to create a child route, preserving good sub-routes.</p>
+                <div class="code-block">
+                    crossover(parent1, parent2) {
+                        const start = Math.floor(Math.random() * this.cities.length);
+                        const end = Math.floor(Math.random() * this.cities.length);
+                        const [startPos, endPos] = [Math.min(start, end), Math.max(start, end)];
+                        
+                        const childCities = new Array(this.cities.length);
+                        const parent1Slice = parent1.cities.slice(startPos, endPos);
+                        
+                        for (let i = startPos; i < endPos; i++) {
+                            childCities[i] = parent1.cities[i];
+                        }
+                        
+                        let parent2Index = 0;
+                        for (let i = 0; i < this.cities.length; i++) {
+                            if (i >= startPos && i < endPos) continue;
+                            while (parent1Slice.includes(parent2.cities[parent2Index])) {
+                                parent2Index++;
+                            }
+                            childCities[i] = parent2.cities[parent2Index];
+                            parent2Index++;
+                        }
+                        
+                        return new Route(childCities);
+                    }
+                </div>
+            </div>
+
+            <div class="algorithm-step">
+                <h3>5. Mutation</h3>
+                <p>Random swaps are applied to some routes to maintain genetic diversity.</p>
+                <div class="code-block">
+                    mutate(route) {
+                        const mutationRate = 0.01;
+                        for (let i = 0; i < route.cities.length; i++) {
+                            if (Math.random() < mutationRate) {
+                                const j = Math.floor(Math.random() * route.cities.length);
+                                [route.cities[i], route.cities[j]] = [route.cities[j], route.cities[i]];
+                            }
+                        }
+                        route.distance = route.calculateDistance();
+                    }
+                </div>
+            </div>
+
+            <div class="algorithm-step">
+                <h3>Algorithm Parameters</h3>
+                <table class="parameter-table">
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Value</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td>Population Size</td>
+                        <td>100</td>
+                        <td>Number of routes in each generation</td>
+                    </tr>
+                    <tr>
+                        <td>Tournament Size</td>
+                        <td>5</td>
+                        <td>Number of routes competing in selection</td>
+                    </tr>
+                    <tr>
+                        <td>Mutation Rate</td>
+                        <td>0.01</td>
+                        <td>Probability of a city swap in mutation</td>
+                    </tr>
+                    <tr>
+                        <td>Elitism</td>
+                        <td>1</td>
+                        <td>Number of best routes preserved between generations</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="algorithm-step">
+                <h3>Real-World Data Integration</h3>
+                <p>The solver can work with real-world data by:</p>
+                <ul>
+                    <li>Importing city coordinates from CSV or JSON files</li>
+                    <li>Using actual road distances instead of straight-line distances</li>
+                    <li>Incorporating traffic patterns and time windows</li>
+                    <li>Adding constraints like vehicle capacity or delivery time windows</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSP Solver</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>TSP Solver</h1>
+            <nav class="nav-buttons">
+                <a href="index.html" class="nav-button">Home</a>
+                <a href="about.html" class="nav-button">About</a>
+                <a href="genetic.html" class="nav-button">Algorithm</a>
+            </nav>
+        </header>
+
+        <div class="data-section">
+            <div class="upload-section">
+                <div class="file-input-container">
+                    <input type="file" id="fileInput" class="file-input" accept=".csv,.json">
+                    <div id="fileInfo"></div>
+                </div>
+            </div>
+
+            <div class="format-section">
+                <div class="format-box">
+                    <h4>CSV Format:</h4>
+                    <pre>x,y,name
+10,20,City1
+30,40,City2
+50,60,City3</pre>
+                </div>
+                <div class="format-box">
+                    <h4>JSON Format:</h4>
+                    <pre>{
+    "cities": [
+        {"x": 10, "y": 20, "name": "City1"},
+        {"x": 30, "y": 40, "name": "City2"},
+        {"x": 50, "y": 60, "name": "City3"}
+    ]
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="visualization-section">
+            <div class="canvas-container">
+                <canvas id="tspCanvas"></canvas>
+            </div>
+            <div class="canvas-container">
+                <canvas id="oagdCanvas"></canvas>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="startButton" class="control-button">Start</button>
+            <button id="stopButton" class="control-button">Stop</button>
+            <button id="resetButton" class="control-button">Reset</button>
+            <button id="toggleOAGDButton" class="control-button">Toggle OAGD</button>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-label">Generation</div>
+                <div id="generationCount" class="stat-value">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Best Distance</div>
+                <div id="bestDistance" class="stat-value">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Average Distance</div>
+                <div id="averageDistance" class="stat-value">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Elapsed Time</div>
+                <div id="elapsedTime" class="stat-value">0s</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="tsp.js"></script>
+    <script>
+        let tspSolver = null;
+
+        // Initialize the solver
+        window.addEventListener('load', () => {
+            tspSolver = new TSPSolver('tspCanvas', 'oagdCanvas');
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            const fileInput = document.getElementById('fileInput');
+            const fileInfo = document.getElementById('fileInfo');
+            
+            document.getElementById('startButton').addEventListener('click', () => {
+                if (tspSolver.cities.length < 3) {
+                    alert('Please add at least 3 cities before starting');
+                    return;
+                }
+                tspSolver.start();
+            });
+
+            document.getElementById('stopButton').addEventListener('click', () => {
+                tspSolver.stop();
+            });
+
+            document.getElementById('resetButton').addEventListener('click', () => {
+                tspSolver.reset();
+            });
+
+            document.getElementById('toggleOAGDButton').addEventListener('click', () => {
+                tspSolver.showOAGD = !tspSolver.showOAGD;
+                tspSolver.draw();
+            });
+
+            // File upload handling
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const extension = file.name.split('.').pop().toLowerCase();
+                            if (extension === 'csv') {
+                                processCsvData(e.target.result);
+                            } else if (extension === 'json') {
+                                processJsonData(e.target.result);
+                            } else {
+                                throw new Error('Unsupported file format');
+                            }
+                            fileInfo.textContent = `Loaded ${tspSolver.cities.length} cities from ${file.name}`;
+                        } catch (error) {
+                            alert('Error processing file: ' + error.message);
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            });
+
+            // Add click handler for canvas to add cities
+            tspSolver.tspCanvas.addEventListener('click', (e) => {
+                const rect = tspSolver.tspCanvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                tspSolver.addCity(x, y);
+            });
+        }
+
+        function processCsvData(csvText) {
+            const lines = csvText.trim().split('\n');
+            if (lines.length < 2) throw new Error('CSV file must contain at least one city');
+
+            // Skip header row
+            const cities = lines.slice(1).map(line => {
+                const [x, y, name] = line.split(',');
+                return {
+                    x: parseFloat(x),
+                    y: parseFloat(y),
+                    name: name ? name.trim() : ''
+                };
+            });
+
+            loadCities(cities);
+        }
+
+        function processJsonData(jsonText) {
+            const data = JSON.parse(jsonText);
+            if (!data.cities || !Array.isArray(data.cities)) {
+                throw new Error('Invalid JSON format');
+            }
+            loadCities(data.cities);
+        }
+
+        function loadCities(cities) {
+            tspSolver.reset();
+            
+            // Scale coordinates to fit canvas
+            const padding = 50;
+            const maxX = Math.max(...cities.map(c => c.x));
+            const maxY = Math.max(...cities.map(c => c.y));
+            const scaleX = (tspSolver.tspCanvas.width - 2 * padding) / maxX;
+            const scaleY = (tspSolver.tspCanvas.height - 2 * padding) / maxY;
+            const scale = Math.min(scaleX, scaleY);
+
+            cities.forEach(city => {
+                tspSolver.addCity(
+                    padding + city.x * scale,
+                    padding + city.y * scale,
+                    city.name
+                );
+            });
+        }
+    </script>
+</body>
+</html> 

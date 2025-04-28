@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced TSP Solver</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --accent-color: #FF9800;
+            --background-color: #f5f7fa;
+            --card-background: rgba(255, 255, 255, 0.9);
+            --text-color: #333;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--background-color) 0%, #e4e8eb 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--text-color);
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .visualization-container {
+            display: flex;
+            gap: 25px;
+            height: 700px;
+            perspective: 1000px;
+        }
+
+        canvas {
+            background: var(--card-background);
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        canvas:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        #tspCanvas {
+            flex: 2;
+        }
+
+        #oagdCanvas {
+            flex: 1;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            padding: 20px;
+            background: var(--card-background);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stats {
+            background: var(--card-background);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-item h3 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 1.2em;
+        }
+
+        .stat-item p {
+            margin: 10px 0 0;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .container > * {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .container > *:nth-child(2) { animation-delay: 0.1s; }
+        .container > *:nth-child(3) { animation-delay: 0.2s; }
+        .container > *:nth-child(4) { animation-delay: 0.3s; }
+
+        @media (max-width: 768px) {
+            .visualization-container {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            canvas {
+                height: 400px;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Traveling Salesman Problem Solver</h1>
+        <div class="visualization-container">
+            <canvas id="tspCanvas"></canvas>
+            <canvas id="oagdCanvas"></canvas>
+        </div>
+        <div class="controls">
+            <button id="addCity">Add City</button>
+            <button id="startSolver">Start Solver</button>
+            <button id="stopSolver">Stop Solver</button>
+            <button id="reset">Reset</button>
+            <button id="toggleOAGD">Toggle OAGD</button>
+        </div>
+        <div class="stats">
+            <div class="stat-item">
+                <h3>Generation</h3>
+                <p id="generation">0</p>
+            </div>
+            <div class="stat-item">
+                <h3>Best Distance</h3>
+                <p id="bestDistance">0</p>
+            </div>
+            <div class="stat-item">
+                <h3>Average Distance</h3>
+                <p id="averageDistance">0</p>
+            </div>
+            <div class="stat-item">
+                <h3>Time Elapsed</h3>
+                <p id="timeElapsed">0s</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="tsp.js"></script>
+    <script src="oagd.js"></script>
+    <script>
+        const solver = new TSPSolver('tspCanvas');
+        const oagdVisualizer = new OAGDVisualizer('oagdCanvas');
+
+        // Update stats display
+        function updateStats() {
+            document.getElementById('generation').textContent = solver.generation;
+            document.getElementById('bestDistance').textContent = 
+                solver.stats.bestDistance.toFixed(2);
+            document.getElementById('averageDistance').textContent = 
+                solver.stats.averageDistance.toFixed(2);
+            document.getElementById('timeElapsed').textContent = 
+                (solver.stats.timeElapsed / 1000).toFixed(1) + 's';
+        }
+
+        document.getElementById('addCity').addEventListener('click', () => {
+            const x = Math.random() * solver.canvas.width;
+            const y = Math.random() * solver.canvas.height;
+            solver.addCity(x, y);
+            updateStats();
+        });
+
+        document.getElementById('startSolver').addEventListener('click', () => {
+            solver.start();
+            updateStats();
+        });
+
+        document.getElementById('stopSolver').addEventListener('click', () => {
+            solver.stop();
+        });
+
+        document.getElementById('reset').addEventListener('click', () => {
+            solver.reset();
+            oagdVisualizer.setRoute(null);
+            updateStats();
+        });
+
+        document.getElementById('toggleOAGD').addEventListener('click', () => {
+            oagdVisualizer.toggleVisibility();
+            if (oagdVisualizer.isVisible && solver.bestRoute) {
+                oagdVisualizer.setRoute(solver.bestRoute);
+            }
+        });
+
+        // Update OAGD visualization and stats when best route changes
+        const originalEvolve = solver.evolve;
+        solver.evolve = function() {
+            originalEvolve.call(this);
+            if (oagdVisualizer.isVisible && this.bestRoute) {
+                oagdVisualizer.setRoute(this.bestRoute);
+            }
+            updateStats();
+        };
+
+        // Initial stats update
+        updateStats();
+    </script>
+</body>
+</html> 
