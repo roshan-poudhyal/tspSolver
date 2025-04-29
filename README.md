@@ -1,31 +1,46 @@
-📌 Project Description
+<h1 align="center">🧭 tspSolver - Solving the Travelling Salesman Problem (TSP)</h1>
 
-Hosted -> http://tsp-solver-lnd96o68h-poudhyalroshan-gmailcoms-projects.vercel.app/
+<p align="center">
+  <img src="https://img.shields.io/github/languages/top/roshan-poudhyal/tspSolver?color=blue&style=flat-square" />
+  <img src="https://img.shields.io/github/repo-size/roshan-poudhyal/tspSolver?style=flat-square" />
+  <img src="https://img.shields.io/github/last-commit/roshan-poudhyal/tspSolver?style=flat-square" />
+  <img src="https://img.shields.io/github/issues/roshan-poudhyal/tspSolver?style=flat-square" />
+</p>
 
+<p align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/4/45/TSP_Animation.gif" alt="TSP Animation" height="300"/>
+</p>
 
+---
 
-The Traveling Salesman Problem asks:
+## 🧠 About the Project
 
-"Given a list of cities and distances between each pair, find the shortest possible route that visits each city exactly once and returns to the starting point."
+**tspSolver** is an intelligent solution to the classic **Travelling Salesman Problem (TSP)**.  
+The goal is to find the **shortest possible route** that visits each city **exactly once** and returns to the starting point.
 
-This project uses a Genetic Algorithm (GA) — a biologically-inspired optimization technique — to find near-optimal solutions for the TSP.
+This project focuses on implementing efficient algorithms and visualization tools to understand the TSP challenge.
 
-✨ Features
-🏙️ Support for any number of cities
+---
 
-🔧 Fully customizable GA parameters:
+## 🌟 Features
 
-Population size
+- 📍 Find the **shortest route** through a given set of cities.
+- ⚡ Fast heuristics and exact algorithms.
+- 🎨 Real-time visualization of the solving process.
+- 💡 Multiple algorithmic strategies (e.g., Brute Force, Greedy, Genetic Algorithms).
+- 📈 Plot the final optimized path.
+- 🔥 Easy to customize city coordinates and number of nodes.
 
-Mutation rate
+---
 
-Number of generations
+## 🛠️ Tech Stack
 
-Selection & Crossover methods
+| Category         | Tools / Libraries Used            |
+|------------------|------------------------------------|
+| 🧠 Algorithms    | Brute Force, Greedy, Optimization Algorithms |
+| 🐍 Programming   | Python 3.x                         |
+| 📈 Visualization | Matplotlib, NetworkX               |
+| 🔢 Math          | NumPy, Random, Combinatorics        |
 
-📈 Real-time visualization of evolving tours (optional)
-
-⚡ Fast and efficient solution even for larger datasets
-
-🛠️ Easy to extend and modify
+---
 
