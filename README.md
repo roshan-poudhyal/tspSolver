@@ -44,7 +44,3 @@ This project focuses on implementing efficient algorithms and visualization tool
 
 ---
 
-# TSP Solver using Genetic Algorithm
-
-This project solves the Traveling Salesman Problem using a Genetic Algorithm approach.
-It demonstrates optimisation techniques and Git-based DevOps workflow.c
